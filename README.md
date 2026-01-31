@@ -23,6 +23,115 @@ packages required to compile this template. Check the
 the most common dependencies. Alternatively, you can use one of the [alternative
 installation](#alternatives-installations) options.
 
+### 构建环境选择
+
+#### Windows 开发环境（推荐使用 WSL）
+
+**⚠️ 重要提示：** Substrate 在 Windows 原生环境下的开发支持并不完善！强烈建议使用 [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)，并按照 Ubuntu/Debian 的说明进行操作。
+
+**在 WSL 中构建的步骤：**
+
+1. 安装 WSL 和 Ubuntu（如果尚未安装）：
+   ```powershell
+   wsl --install
+   ```
+
+2. 打开 WSL 终端并安装依赖：
+   ```bash
+   sudo apt update
+   sudo apt install -y git clang curl libssl-dev llvm libudev-dev
+   ```
+
+3. 安装 Rust 工具链：
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   source ~/.cargo/env
+   rustup default stable
+   rustup target add wasm32-unknown-unknown
+   ```
+
+4. 进入项目目录并构建：
+   ```bash
+   cd /mnt/c/Users/12392/Desktop/node\ template/my-node-template
+   cargo build --release
+   ```
+
+#### 云服务器部署（DigitalOcean / AWS / 等）
+
+对于生产环境部署或需要 24/7 运行的节点，建议使用云服务器：
+
+**推荐配置：**
+- **操作系统：** Ubuntu 22.04 LTS 或更高版本
+- **资源要求：** 最低 4GB 内存，2 个 CPU 核心（生产环境建议 8GB+）
+- **存储：** 50GB+ SSD
+
+**部署步骤：**
+
+1. 通过 SSH 连接到服务器：
+   ```bash
+   ssh user@your-server-ip
+   ```
+
+2. 安装依赖：
+   ```bash
+   sudo apt update
+   sudo apt install -y git clang curl libssl-dev llvm libudev-dev build-essential
+   ```
+
+3. 安装 Rust：
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   source ~/.cargo/env
+   rustup default stable
+   rustup target add wasm32-unknown-unknown
+   ```
+
+4. 克隆并构建：
+   ```bash
+   git clone https://github.com/cshonor/create-chain-substrate-node-template-rust.git
+   cd create-chain-substrate-node-template-rust
+   cargo build --release
+   ```
+
+5. 配置为系统服务（使用 systemd）：
+   ```bash
+   # 创建服务文件
+   sudo nano /etc/systemd/system/substrate-node.service
+   ```
+
+   添加以下内容：
+   ```ini
+   [Unit]
+   Description=Substrate Node
+   After=network.target
+
+   [Service]
+   Type=simple
+   User=your-user
+   WorkingDirectory=/path/to/your/node
+   ExecStart=/path/to/target/release/solochain-template-node --chain dev --name MyNode
+   Restart=always
+   RestartSec=10
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+   启用并启动服务：
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable substrate-node
+   sudo systemctl start substrate-node
+   ```
+
+**环境对比：**
+
+| 环境 | 使用场景 | 优点 | 缺点 |
+|------------|----------|------|------|
+| **WSL** | 本地开发与测试 | 易于设置，无成本，便于调试 | 不适合 24/7 运行 |
+| **云服务器** | 生产环境部署 | 24/7 运行，网络更好，可扩展 | 需要服务器成本，设置较复杂 |
+| **Docker** | 一致的构建环境 | 随处可用，隔离环境 | 需要 Docker 知识 |
+
 Fetch solochain template code:
 
 ```sh
