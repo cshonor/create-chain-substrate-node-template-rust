@@ -1,0 +1,92 @@
+[workspace]
+members = [
+	"node",
+	"runtime",
+	"pallets/*",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.0.0"
+authors = ["Substrate DevHub <https://github.com/substrate-developer-hub>"]
+homepage = "https://substrate.io"
+repository = "https://github.com/paritytech/polkadot-sdk"
+license = "Unlicense"
+edition = "2021"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.dependencies]
+# Substrate dependencies
+codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false, features = ["derive", "full"] }
+scale-info = { version = "2.13.0", default-features = false, features = ["derive", "serde"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+
+# Substrate client
+sc-basic-authorship = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-consensus = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-consensus-grandpa = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-executor = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-network = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-offchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-service = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-telemetry = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-blockchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-consensus-grandpa = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-genesis-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-inherents = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-io = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-keyring = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-offchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-session = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-storage = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-version = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+sp-block-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+
+# FRAME
+frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+frame-executive = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+frame-metadata-hash-extension = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+frame-support = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+frame-system-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+frame-try-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+substrate-frame-rpc-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+
+# FRAME pallets
+pallet-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+pallet-grandpa = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+pallet-sudo = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+pallet-template = { path = "pallets/template", default-features = false }
+pallet-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+pallet-transaction-payment = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false }
+
+# Build dependencies
+substrate-build-script-utils = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
+
+# Other dependencies
+clap = { version = "4.5", features = ["derive"] }
+futures = { version = "0.3", default-features = false, features = ["thread-pool"] }
+jsonrpsee = { version = "0.23", default-features = false, features = ["server"] }
+
+# Local runtime
+solochain-template-runtime = { path = "runtime", default-features = false }
+
