@@ -36,25 +36,75 @@ installation](#alternatives-installations) options.
    wsl --install
    ```
 
-2. 打开 WSL 终端并安装依赖：
+2. **重要：将项目迁移到 WSL Linux 文件系统**（⚠️ 必须，性能要求）：
+   
+   **方式一：使用迁移脚本（推荐）**
    ```bash
-   sudo apt update
-   sudo apt install -y git clang curl libssl-dev llvm libudev-dev
+   # 在 WSL 中运行
+   cd /mnt/c/Users/12392/Desktop/node\ template/my-node-template
+   bash scripts/wsl-migrate.sh
+   cd ~/my-node-template
+   ```
+   
+   **方式二：手动复制**
+   ```bash
+   # 将项目从 Windows 文件系统复制到 Linux 文件系统
+   cp -r /mnt/c/Users/12392/Desktop/node\ template/my-node-template ~/my-node-template
+   cd ~/my-node-template
+   ```
+   
+   **方式三：直接在 Linux 文件系统中克隆**
+   ```bash
+   cd ~
+   git clone https://github.com/cshonor/create-chain-substrate-node-template-rust.git my-node-template
+   cd my-node-template
+   ```
+   
+   ⚠️ **为什么必须在 Linux 文件系统中？**
+   - Windows 文件系统（`/mnt/c/`）上的编译速度会慢 **10-100 倍**
+   - 可能遇到文件权限和路径问题
+   - Linux 文件系统（`~/`）提供原生性能
+
+3. 设置开发环境（使用提供的脚本）：
+   ```bash
+   # 将项目从 Windows 文件系统复制到 Linux 文件系统
+   cp -r /mnt/c/Users/12392/Desktop/node\ template/my-node-template ~/my-node-template
+   cd ~/my-node-template
+   
+   # 或者直接在 Linux 文件系统中克隆
+   cd ~
+   git clone https://github.com/cshonor/create-chain-substrate-node-template-rust.git my-node-template
+   cd my-node-template
    ```
 
-3. 安装 Rust 工具链：
+5. 设置开发环境并运行：
    ```bash
+   # 首次运行：设置开发环境（安装 Rust 和依赖）
+   bash scripts/wsl-setup.sh
+   
+   # 构建项目
+   bash scripts/wsl-build.sh
+   
+   # 运行节点
+   bash scripts/wsl-run.sh
+   ```
+
+   或者手动执行：
+   ```bash
+   # 设置环境（仅首次需要）
+   sudo apt update
+   sudo apt install -y git clang curl libssl-dev llvm libudev-dev build-essential protobuf-compiler
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    source ~/.cargo/env
    rustup default stable
    rustup target add wasm32-unknown-unknown
+   
+   # 构建和运行
+   cargo build --release
+   ./target/release/solochain-template-node --dev
    ```
 
-4. 进入项目目录并构建：
-   ```bash
-   cd /mnt/c/Users/12392/Desktop/node\ template/my-node-template
-   cargo build --release
-   ```
+**⚠️ 性能提示：** 在 Windows 文件系统（`/mnt/c/...`）上编译 Rust 项目会非常慢。强烈建议将项目复制到 WSL 的 Linux 文件系统（`~/` 或 `/home/username/`）中进行开发。
 
 #### 云服务器部署（DigitalOcean / AWS / 等）
 
