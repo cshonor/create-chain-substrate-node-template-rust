@@ -25,18 +25,37 @@ installation](#alternatives-installations) options.
 
 ### 构建环境选择
 
+> **参考官方文档：** 本项目的安装步骤基于 [Polkadot SDK 官方安装文档](https://docs.polkadot.com/parachains/install-polkadot-sdk/)。建议同时参考官方文档获取最新信息。
+
 #### Windows 开发环境（推荐使用 WSL）
 
-**⚠️ 重要提示：** Substrate 在 Windows 原生环境下的开发支持并不完善！强烈建议使用 [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)，并按照 Ubuntu/Debian 的说明进行操作。
+**⚠️ 重要提示：** Substrate 在 Windows 原生环境下的开发支持并不完善！强烈建议使用 [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)，并按照 [官方 WSL 安装指南](https://docs.polkadot.com/parachains/install-polkadot-sdk/#install-dependencies-windows-wsl) 进行操作。
 
-**在 WSL 中构建的步骤：**
+**在 WSL 中构建的步骤（遵循官方文档）：**
 
-1. 安装 WSL 和 Ubuntu（如果尚未安装）：
+1. **安装 WSL 和 Ubuntu**（如果尚未安装）：
    ```powershell
    wsl --install
    ```
+   参考：[官方 WSL 设置指南](https://docs.polkadot.com/parachains/install-polkadot-sdk/#before-you-begin)
 
-2. **重要：将项目迁移到 WSL Linux 文件系统**（⚠️ 必须，性能要求）：
+2. **安装系统依赖**（在 WSL Ubuntu 中）：
+   ```bash
+   sudo apt update
+   sudo apt install -y git clang curl libssl-dev llvm libudev-dev build-essential protobuf-compiler
+   ```
+   参考：[官方依赖安装步骤](https://docs.polkadot.com/parachains/install-polkadot-sdk/#install-required-packages-and-rust)
+
+3. **安装 Rust 工具链**：
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   source ~/.cargo/env
+   rustup default stable
+   rustup target add wasm32-unknown-unknown
+   ```
+   参考：[官方 Rust 安装步骤](https://docs.polkadot.com/parachains/install-polkadot-sdk/#install-required-packages-and-rust)
+
+4. **重要：将项目迁移到 WSL Linux 文件系统**（⚠️ 必须，性能要求）：
    
    **方式一：使用迁移脚本（推荐）**
    ```bash
@@ -65,19 +84,33 @@ installation](#alternatives-installations) options.
    - 可能遇到文件权限和路径问题
    - Linux 文件系统（`~/`）提供原生性能
 
-3. 设置开发环境（使用提供的脚本）：
+4. **获取项目代码**：
+   
+   **方式一：使用迁移脚本（推荐）**
+   ```bash
+   # 在 WSL 中运行
+   cd /mnt/c/Users/12392/Desktop/node\ template/my-node-template
+   bash scripts/wsl-migrate.sh
+   cd ~/my-node-template
+   ```
+   
+   **方式二：手动复制**
    ```bash
    # 将项目从 Windows 文件系统复制到 Linux 文件系统
    cp -r /mnt/c/Users/12392/Desktop/node\ template/my-node-template ~/my-node-template
    cd ~/my-node-template
+   ```
    
-   # 或者直接在 Linux 文件系统中克隆
+   **方式三：直接在 Linux 文件系统中克隆**
+   ```bash
    cd ~
    git clone https://github.com/cshonor/create-chain-substrate-node-template-rust.git my-node-template
    cd my-node-template
    ```
 
-5. 设置开发环境并运行：
+5. **构建项目**（参考：[官方构建步骤](https://docs.polkadot.com/parachains/install-polkadot-sdk/#compile-the-polkadot-sdk)）：
+   
+   **方式一：使用提供的脚本（推荐）**
    ```bash
    # 首次运行：设置开发环境（安装 Rust 和依赖）
    bash scripts/wsl-setup.sh
@@ -89,20 +122,57 @@ installation](#alternatives-installations) options.
    bash scripts/wsl-run.sh
    ```
 
-   或者手动执行：
+   **方式二：手动构建**
    ```bash
-   # 设置环境（仅首次需要）
-   sudo apt update
-   sudo apt install -y git clang curl libssl-dev llvm libudev-dev build-essential protobuf-compiler
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   # 进入项目目录
+   cd ~/my-node-template
    source ~/.cargo/env
-   rustup default stable
-   rustup target add wasm32-unknown-unknown
    
-   # 构建和运行
-   cargo build --release
+   # 构建项目（如果遇到 WASM 构建问题，可以跳过）
+   SKIP_WASM_BUILD=1 cargo build --release --bin solochain-template-node
+   
+   # 运行节点
    ./target/release/solochain-template-node --dev
    ```
+
+6. **验证构建**（参考：[官方验证步骤](https://docs.polkadot.com/parachains/install-polkadot-sdk/#verify-the-build)）：
+   ```bash
+   # 检查可执行文件是否存在
+   ls -lh ./target/release/solochain-template-node
+   
+   # 查看节点版本信息
+   ./target/release/solochain-template-node --version
+   
+   # 查看帮助信息
+   ./target/release/solochain-template-node --help
+   ```
+
+7. **运行节点**（参考：[官方运行步骤](https://docs.polkadot.com/parachains/install-polkadot-sdk/#run-the-kitchensink-node-in-development-mode)）：
+   ```bash
+   # 运行开发节点
+   ./target/release/solochain-template-node --dev
+   ```
+   
+   节点启动后，您应该看到类似输出：
+   ```
+   Running JSON-RPC server: addr=127.0.0.1:9944
+   🏁 CPU single core score: ...
+   🏆 Imported #1 ...
+   ```
+   
+   节点将在 `ws://localhost:9944` 上提供 JSON-RPC 服务。
+   
+   **连接到节点：**
+   - 使用 [Polkadot.js Apps](https://polkadot.js.org/apps/) 连接到本地节点
+   - 在 Polkadot.js Apps 中，点击左上角的网络图标
+   - 选择 **Development** > **Local Node**
+   - 点击 **Switch** 连接到本地节点
+
+**📝 与官方文档的差异说明：**
+- **官方文档**：主要介绍如何构建整个 Polkadot SDK 仓库（包括 kitchensink node）
+- **本项目**：使用 Polkadot SDK 的 node template，步骤更简化，适合快速开始
+- **相同点**：依赖安装、Rust 工具链配置、构建流程基本相同
+- **如果遇到问题**：建议参考 [官方文档的故障排除部分](https://docs.polkadot.com/parachains/install-polkadot-sdk/) 和本 README 的故障排除章节
 
 **⚠️ 性能提示：** 在 Windows 文件系统（`/mnt/c/...`）上编译 Rust 项目会非常慢。强烈建议将项目复制到 WSL 的 Linux 文件系统（`~/` 或 `/home/username/`）中进行开发。
 
