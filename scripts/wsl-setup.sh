@@ -44,6 +44,18 @@ rustup default stable
 rustup update
 rustup target add wasm32-unknown-unknown
 
+# 可选：安装 nightly 工具链（用于 WASM 构建，解决 duplicate lang item 问题）
+echo ""
+read -p "是否安装 nightly 工具链用于 WASM 构建？(y/N): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "🌙 安装 nightly 工具链..."
+    rustup toolchain install nightly
+    rustup target add wasm32-unknown-unknown --toolchain nightly
+    echo "✅ nightly 工具链已安装"
+    echo "💡 使用方式: USE_NIGHTLY_WASM=1 bash scripts/wsl-build.sh"
+fi
+
 # 显示版本信息
 echo ""
 echo "✅ 环境设置完成！"

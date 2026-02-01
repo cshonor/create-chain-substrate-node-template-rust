@@ -20,10 +20,13 @@ unsafe_code = "forbid"
 [workspace.dependencies]
 # Substrate dependencies
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false, features = ["derive", "full"] }
+# scale-info: 使用 2.11 版本以兼容 crates.io 镜像（2.13.0 在镜像中不可用）
 scale-info = { version = "2.11", default-features = false, features = ["derive", "serde"] }
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 
 # Substrate client - using master branch (latest stable)
+# 注意: 使用 master 分支而不是特定标签，因为稳定标签可能不存在
+# 如果遇到构建问题，可以考虑使用稳定标签版本（如 polkadot-v1.20.0）
 sc-basic-authorship = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
 sc-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
 sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = true }
@@ -85,6 +88,7 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", d
 # Other dependencies
 clap = { version = "4.5", features = ["derive"] }
 futures = { version = "0.3", default-features = false, features = ["thread-pool"] }
+# jsonrpsee: 使用 0.24 版本以匹配 Polkadot SDK master 分支（避免版本冲突）
 jsonrpsee = { version = "0.24", default-features = false, features = ["server"] }
 
 # Local runtime

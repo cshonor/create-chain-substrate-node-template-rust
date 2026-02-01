@@ -24,10 +24,35 @@ fi
 echo "🦀 Rust 版本: $(rustc --version)"
 echo "📦 Cargo 版本: $(cargo --version)"
 
+# 检查是否跳过 WASM 构建
+SKIP_WASM=${SKIP_WASM_BUILD:-0}
+USE_NIGHTLY=${USE_NIGHTLY_WASM:-0}
+
 # 构建项目
 echo ""
-echo "🔨 开始编译（这可能需要一些时间）..."
-cargo build --release
+if [ "$SKIP_WASM" = "1" ]; then
+    echo "⚠️  跳过 WASM 构建（快速模式）"
+    echo "🔨 开始编译节点二进制（这可能需要一些时间）..."
+    SKIP_WASM_BUILD=1 cargo build --release --bin solochain-template-node
+elif [ "$USE_NIGHTLY" = "1" ] || command -v rustup &> /dev/null && rustup toolchain list | grep -q "nightly"; then
+    echo "🌙 使用 nightly 工具链构建 WASM runtime"
+    echo "🔨 开始编译（这可能需要一些时间）..."
+    WASM_BUILD_TOOLCHAIN=nightly cargo build --release
+else
+    echo "🔨 开始编译（这可能需要一些时间）..."
+    echo "💡 提示: 如果遇到 duplicate lang item 错误，可以："
+    echo "   1. 设置 SKIP_WASM_BUILD=1 跳过 WASM 构建"
+    echo "   2. 设置 USE_NIGHTLY_WASM=1 使用 nightly 工具链"
+    cargo build --release || {
+        echo ""
+        echo "❌ 构建失败！"
+        echo ""
+        echo "💡 建议尝试以下方案："
+        echo "   方案 1（快速）: SKIP_WASM_BUILD=1 bash scripts/wsl-build.sh"
+        echo "   方案 2（完整）: USE_NIGHTLY_WASM=1 bash scripts/wsl-build.sh"
+        exit 1
+    }
+fi
 
 echo ""
 echo "✅ 构建完成！"
