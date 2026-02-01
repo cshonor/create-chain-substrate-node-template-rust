@@ -290,13 +290,89 @@ cargo build --release
 - 使用国内镜像（已配置 tuna 镜像）
 - 检查网络连接和防火墙设置
 
+#### 8. duplicate lang item 错误（build-std 冲突）
+
+**错误信息：**
+```
+error[E0152]: duplicate lang item in crate `core` (which `std` depends on): `sized`
+```
+
+**原因：** 这是 `build-std` 特性与预编译标准库冲突导致的已知问题，在使用 Polkadot SDK master 分支时常见。
+
+**解决方案：**
+
+**方案 A：使用 nightly 工具链构建 WASM（推荐）**
+```bash
+# 安装 nightly 工具链
+rustup toolchain install nightly
+rustup target add wasm32-unknown-unknown --toolchain nightly
+
+# 使用 nightly 构建 WASM runtime
+WASM_BUILD_TOOLCHAIN=nightly cargo build --release
+```
+
+**方案 B：跳过 WASM 构建（快速方案）**
+```bash
+# 跳过 WASM 构建，只构建节点二进制
+SKIP_WASM_BUILD=1 cargo build --release --bin solochain-template-node
+```
+注意：此方法构建的节点没有 WASM runtime，但可以用于开发和测试。
+
+**方案 C：使用稳定版本的 Polkadot SDK**
+如果 master 分支问题持续，考虑使用稳定标签版本：
+```bash
+# 检查可用稳定版本
+git ls-remote --tags https://github.com/paritytech/polkadot-sdk.git | grep -E 'polkadot-v1\.' | tail -10
+
+# 然后更新 Cargo.toml 使用稳定版本（例如：tag = "polkadot-v1.20.0"）
+```
+
+#### 9. jsonrpsee 版本冲突
+
+**错误信息：**
+```
+error[E0277]: the trait bound `Methods: From<RpcModule<...>>` is not satisfied
+note: there are multiple different versions of crate `jsonrpsee_core` in the dependency graph
+```
+
+**原因：** Polkadot SDK master 分支使用 `jsonrpsee 0.24`，但项目配置可能指定了 `0.23`。
+
+**解决方案：**
+```bash
+# 更新 Cargo.toml 中的 jsonrpsee 版本
+# 将 version = "0.23" 改为 version = "0.24"
+
+# 然后重新构建
+cargo clean -p solochain-template-node
+cargo build --release
+```
+
+**已修复：** 项目已更新为使用 `jsonrpsee = "0.24"`。
+
+#### 10. Rust 版本要求冲突
+
+**错误信息：**
+```
+error: rustc 1.85.0-nightly is not supported by the following packages:
+  time@0.3.46 requires rustc 1.88.0
+```
+
+**原因：** 某些依赖需要更新的 Rust 版本。
+
+**解决方案：**
+- 使用最新的 nightly 工具链：`WASM_BUILD_TOOLCHAIN=nightly cargo build --release`
+- 或使用 stable 工具链（如果满足版本要求）
+- 或降级依赖版本（不推荐）
+
 ### 项目配置说明
 
 **当前配置：**
 - **Polkadot SDK 版本：** `master` 分支（最新稳定版本）
 - **Rust 版本：** `stable`（由 `rust-toolchain.toml` 指定）
 - **scale-info 版本：** `2.11`（自动选择兼容版本）
+- **jsonrpsee 版本：** `0.24`（匹配 Polkadot SDK master 分支）
 - **构建目标：** `wasm32-unknown-unknown` + `x86_64-unknown-linux-gnu`
+- **WASM 构建工具链：** 建议使用 `nightly`（通过 `WASM_BUILD_TOOLCHAIN` 环境变量）
 
 **重要文件：**
 - `Cargo.toml` - 项目依赖配置
