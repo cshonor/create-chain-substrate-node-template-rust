@@ -182,6 +182,127 @@ installation](#alternatives-installations) options.
 | **云服务器** | 生产环境部署 | 24/7 运行，网络更好，可扩展 | 需要服务器成本，设置较复杂 |
 | **Docker** | 一致的构建环境 | 随处可用，隔离环境 | 需要 Docker 知识 |
 
+### 常见问题与故障排除
+
+#### 1. 版本标签不存在错误
+
+**错误信息：**
+```
+fatal: couldn't find remote ref refs/tags/polkadot-sdk-v1.2.1
+```
+
+**原因：** `Cargo.toml` 中指定了不存在的 Polkadot SDK 版本标签。
+
+**解决方案：**
+- 已修复：项目现在使用 `master` 分支（最新稳定版本）
+- 如果遇到类似问题，检查 `Cargo.toml` 中的 `tag = "xxx"` 是否有效
+- 可以移除 `tag` 参数，使用默认的 `master` 分支
+
+#### 2. scale-info 版本不匹配
+
+**错误信息：**
+```
+error: failed to select a version for the requirement `scale-info = "^2.13.0"`
+candidate versions found which didn't match: 2.11.6, 2.11.5, ...
+```
+
+**原因：** 指定的 `scale-info` 版本在 crates.io 镜像中不存在。
+
+**解决方案：**
+- 已修复：将 `scale-info` 版本从 `2.13.0` 改为 `2.11`（Cargo 会自动选择兼容版本）
+- 如果仍有问题，可以尝试：
+  ```bash
+  # 检查可用版本
+  cargo search scale-info
+  
+  # 或使用官方 crates.io（如果使用镜像）
+  # 编辑 ~/.cargo/config.toml，移除或注释掉镜像配置
+  ```
+
+#### 3. 重复 lang item 错误
+
+**错误信息：**
+```
+error[E0152]: duplicate lang item in crate `core` (which `std` depends on): `sized`
+```
+
+**原因：** Rust 工具链冲突或构建缓存损坏。
+
+**解决方案：**
+```bash
+# 1. 清理构建缓存
+cargo clean
+
+# 2. 重新安装 wasm32-unknown-unknown 目标
+rustup target remove wasm32-unknown-unknown
+rustup target add wasm32-unknown-unknown
+
+# 3. 更新 Rust 工具链
+rustup update stable
+
+# 4. 重新构建
+cargo build --release
+```
+
+#### 4. WSL 文件系统性能问题
+
+**问题：** 在 Windows 文件系统（`/mnt/c/...`）上编译非常慢。
+
+**解决方案：**
+- **必须**将项目迁移到 WSL Linux 文件系统（`~/`）
+- 使用提供的迁移脚本：`bash scripts/wsl-migrate.sh`
+- 或手动复制：`cp -r /mnt/c/path/to/project ~/project`
+
+#### 5. 构建时间过长
+
+**说明：** 首次构建需要 10-30 分钟是正常的，因为需要：
+- 下载所有依赖（包括整个 Polkadot SDK）
+- 编译所有依赖项
+- 编译项目代码
+
+**优化建议：**
+- 确保在 Linux 文件系统中构建（不是 Windows 文件系统）
+- 使用 SSD 存储
+- 增加并行编译线程：`cargo build --release -j $(nproc)`
+- 后续构建会更快（增量编译）
+
+#### 6. Git 仓库同步问题
+
+**问题：** Windows 和 WSL 中的项目文件不同步。
+
+**解决方案：**
+- 在 WSL 中手动复制文件：
+  ```bash
+  cp "/mnt/c/Users/12392/Desktop/node template/my-node-template/Cargo.toml" ~/my-node-template/Cargo.toml
+  ```
+- 或使用 Git 同步：
+  ```bash
+  cd ~/my-node-template
+  git pull origin main
+  ```
+
+#### 7. 网络连接问题
+
+**问题：** 无法从 GitHub 下载依赖。
+
+**解决方案：**
+- 配置 Git 代理（如果需要）
+- 使用国内镜像（已配置 tuna 镜像）
+- 检查网络连接和防火墙设置
+
+### 项目配置说明
+
+**当前配置：**
+- **Polkadot SDK 版本：** `master` 分支（最新稳定版本）
+- **Rust 版本：** `stable`（由 `rust-toolchain.toml` 指定）
+- **scale-info 版本：** `2.11`（自动选择兼容版本）
+- **构建目标：** `wasm32-unknown-unknown` + `x86_64-unknown-linux-gnu`
+
+**重要文件：**
+- `Cargo.toml` - 项目依赖配置
+- `rust-toolchain.toml` - Rust 工具链版本
+- `scripts/wsl-*.sh` - WSL 环境脚本
+
 Fetch solochain template code:
 
 ```sh
